@@ -10,9 +10,9 @@
         </tr>
     </thead>
     <tbody>
-        % for routeid in rdict:
+        % for route in sorted(routes):
             <tr>
-                <td><a href="routes/{{rdict[routeid][0]}}">{{rdict[routeid][0]}} {{rdict[routeid][1]}}</a></td>
+                <td><a href="routes/{{route.number}}">{{ route }}</a></td>
             </tr>
         % end
     </tbody>

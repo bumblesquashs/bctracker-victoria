@@ -1,25 +1,28 @@
-% include('templates/header', title='{0} {1}'.format(routenum, routename))
+% from trip import Direction
 
-<h1>{{routenum}} {{routename}}</h1>
+% include('templates/header', title=str(route))
+
+<h1>{{ route }}</h1>
 <hr />
 
-% for day_str in day_order:
-  % trip_list = day_triplistdict[day_str]
-  % ib_trips = [trip for trip in trip_list if trip.directionid == '0']
-  % ob_trips = [trip for trip in trip_list if trip.directionid == '1']
-  <h2>{{day_str}}</h2>
+% for service in sorted(route.services):
+  % trips = [trip for trip in route.trips if trip.service == service]
 
-  % if(len(ob_trips) != 0):
-    <p>Outbound - {{len(ob_trips)}} Trips</p>
-  
-    % include('templates/triplist', triplist=ob_trips)
+  <h2>{{ service }}</h2>
+
+  % outbound_trips = [trip for trip in trips if trip.direction == Direction.OUTBOUND]
+  % if len(outbound_trips) > 0:
+    <p>Outbound - {{ len(outbound_trips) }} trips</p>
+
+    % include('templates/triplist', trips=outbound_trips)
   % end
 
-  % if(len(ib_trips) != 0):
-    <p>Inbound - {{len(ib_trips)}} Trips</p>
-  
-    % include('templates/triplist', triplist=ib_trips)
+  % inbound_trips = [trip for trip in trips if trip.direction == Direction.INBOUND]
+  % if len(inbound_trips) > 0:
+    <p>Inbound - {{ len(inbound_trips) }} trips</p>
+
+    % include('templates/triplist', trips=inbound_trips)
   % end
-%end
+% end
 
 % include('templates/footer')

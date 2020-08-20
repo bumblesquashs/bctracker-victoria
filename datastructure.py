@@ -1,5 +1,6 @@
 from datetime import date
 import start as start_mod
+from stop_time import load_stop_times
 
 pathprefix = './data/google_transit/'
 
@@ -299,6 +300,8 @@ def populate_calendar():
 
 # this loads in all the data and sets up the global dicts
 def start():
+    load_stop_times()
+
     # these are just used internally to this function
     blocklistdict = {}  # dict of block id->list of trips in the block
     firststoptimes_dict = {}  # dict of trip id -> StopTime object

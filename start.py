@@ -13,6 +13,9 @@ import realtime as rt
 import history as hist
 import datastructure as ds
 
+from bus_history import update_history
+from bus_realtime import update_bus_realtime
+
 #some config
 AUTO_RELOAD = True # Will we auto reload when we detect that our gtfs is out of date?
 RELOAD_ENABLED = True # is the reloading behavior allowed at all?
@@ -86,4 +89,8 @@ if __name__ == "__main__":
     # If we've got this far, we're just about ready to roll. Add the munching cron job
     munch.start_cron()
     # And off we go! To the web file!
+
+    update_bus_realtime()
+    update_history()
+
     web.startup()

@@ -1,8 +1,6 @@
 % import datastructure as ds
 % from formatting import format_time
 
-% triplist.sort(key=ds.trip_to_numseconds)
-
 <table class="pure-table pure-table-horizontal pure-table-striped">
   <thead>
     <tr>
@@ -16,14 +14,14 @@
   </thead>
 
   <tbody>
-    %for trip in triplist:
+    % for trip in sorted(trips):
       <tr>
-        <td>{{ format_time(trip.starttime) }}</td>
+        <td>{{ trip.stop_times[0].time }}</td>
         <td>{{ trip.headsign }}</td>
-        <td class="desktop-only"><a href="/stops/{{ds.stopdict[trip.stoplist[0].stopid].stopcode}}">{{ trip.startstopname }}</a></td>
-        <td class="desktop-only"><a href="/blocks/{{trip.blockid}}">{{ trip.blockid }}</a></td>
-        <td><a href="/trips/{{trip.tripid}}">{{ trip.tripid }}</a></td>
+        <td class="desktop-only"><a href="/stops/{{trip.stop_times[0].stop.number}}">{{ trip.stop_times[0].stop.name }}</a></td>
+        <td class="desktop-only"><a href="/blocks/{{trip.block.block_id}}">{{ trip.block.block_id }}</a></td>
+        <td><a href="/trips/{{trip.trip_id}}">{{ trip.trip_id }}</a></td>
       </tr>
-    %end
+    % end
   </tbody>
 </table>

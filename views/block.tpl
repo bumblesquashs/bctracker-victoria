@@ -1,10 +1,7 @@
-% import datastructure as ds
-% from formatting import format_time
+% include('templates/header', title=f'Block {block.block_id}')
 
-% include('templates/header', title='Block {0}'.format(blockid))
-
-<h1>Block {{blockid}}</h1>
-<h2>Service Days: {{ds.days_of_week_dict[triplist[0].serviceid]}}</h2>
+<h1>Block {{ block.block_id }}</h1>
+<h2>{{ block.service }}</h2>
 <hr />
 
 <table class="pure-table pure-table-horizontal pure-table-striped">
@@ -19,20 +16,19 @@
   </thead>
 
   <tbody>
-    % triplist.sort(key=ds.trip_to_numseconds)
-    % for trip in triplist:
-    <tr>
-      <td>{{ format_time(trip.starttime) }}</td>
-      <td>
-        {{ trip.headsign }}
-        <span class="mobile-only smaller-font">
-          <br />
-          {{ ds.directionid_dict[trip.directionid] }}
-        </span>
-      </td>
-      <td class="desktop-only">{{ ds.directionid_dict[trip.directionid] }}</td>
-      <td><a href="/trips/{{trip.tripid}}">{{ trip.tripid }}</a></td>
-    </tr>
+    % for trip in sorted(block.trips):
+      <tr>
+        <td>{{ trip.start_time }}</td>
+        <td>
+          {{ trip.headsign }}
+          <span class="mobile-only smaller-font">
+            <br />
+            {{ trip.direction.value }}
+          </span>
+        </td>
+        <td class="desktop-only">{{ trip.direction.value }}</td>
+        <td><a href="/trips/{{trip.trip_id}}">{{ trip.trip_id }}</a></td>
+      </tr>
     % end
   </tbody>
 </table>

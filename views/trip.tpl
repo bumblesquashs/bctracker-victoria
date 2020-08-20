@@ -1,19 +1,16 @@
-% import datastructure as ds
-% from formatting import format_time
+% include('templates/header', title=str(trip))
 
-% include('templates/header', title=trip.headsign)
-
-<h1>{{trip.headsign}}</h1>
-<h2>Trip {{tripid}} ({{ds.days_of_week_dict[trip.serviceid]}})</h2>
+<h1>{{ trip }}</h1>
+<h2>Trip {{ trip.trip_id }} ({{ trip.service }})</h2>
 <hr />
 
 <p>
-  <a href="/routes/{{trip.routenum}}">View Route</a>
+  <a href="/routes/{{trip.route.number}}">View Route</a>
   <br />
-  <a href="/blocks/{{trip.blockid}}">View Block</a>
+  <a href="/blocks/{{trip.block.block_id}}">View Block</a>
 </p>
 
-<p>Number of stops: {{len(trip.stoplist)}}</p>
+<p>Number of stops: {{ len(trip.stop_times) }}</p>
 
 <table class="pure-table pure-table-horizontal pure-table-striped">
   <thead>
@@ -25,19 +22,17 @@
     </tr>
   </thead>
   <tbody>
-    % stoplist = trip.stoplist
-    % for stop in stoplist:
-      % stopcode = ds.stopdict[stop.stopid].stopcode
+    % for stop_time in sorted(trip.stop_times):
       <tr>
-        <td>{{ format_time(stop.departtime) }}</td>
+        <td>{{ stop_time.time }}</td>
         <td>
-          <a href="/stops/{{stopcode}}">{{ stopcode }}</a>
+          <a href="/stops/{{stop_time.stop.number}}">{{ stop_time.stop.number }}</a>
           <span class="mobile-only smaller-font">
             <br />
-            {{ ds.stopdict[stop.stopid].stopname }}
+            {{ stop_time.stop.name }}
           </span>
         </td>
-        <td class="desktop-only">{{ ds.stopdict[stop.stopid].stopname }}</td>
+        <td class="desktop-only">{{ stop_time.stop.name }}</td>
       </tr>
     % end
   </tbody>

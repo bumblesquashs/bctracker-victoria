@@ -11,6 +11,14 @@ import businfotable as businfo
 import scrape_fleetnums as scrape
 from bottle import route, run, request, template, Bottle, static_file
 
+from block import is_block, get_block, get_all_blocks
+from bus import BusStatus, is_bus_number, get_bus_by_number, get_all_buses
+from bus_history import update_history
+from bus_realtime import update_bus_realtime
+from route import is_route_number, get_route_by_number, get_all_routes
+from stop import is_stop_number, get_stop_by_number
+from trip import is_trip, get_trip
+
 PLACEHOLDER = '100000'
 rdict = {}     # rdict is routeid -> (routenum, routename, routeid)
 reverse_rdict = {} # route num -> routeid
@@ -45,45 +53,18 @@ def style(filename):
 
 @app.route('/')
 def index():
-    if 'munch' in request.query:  # for the refresh data thing
-        print('Oi! gotta munch')
-        valid = munch.munch()
-        if((not valid) and start.RELOAD_ENABLED):
-            start.download_and_restart()
-    return template('home', rdict=rdict)
+    return template('home', routes=get_all_routes())
 
 @app.route('/routes')
 @app.route('/routes/')
 def routes():
-    return template('routes', rdict=rdict)
+    return template('routes', routes=get_all_routes())
 
-@app.route('/routes/<routenum:int>')
-def route_number(routenum):
-    try:
-        this_route = reverse_rdict[str(routenum)]
-    except KeyError:
-        return template('error', error='Route {0} Not Found'.format(routenum))
-    try:
-        trip_list = ds.route_triplistdict[this_route]
-    except:
-        return template('error', error='Route {0} Not Found'.format(routenum))
-    day_triplistdict = {}
-    day_order = []
-    for trip in trip_list:
-        if(ds.days_of_week_dict[trip.serviceid]) == 'INVALID':
-            continue
-        if(trip.use_alt_day_string):
-            keystr = trip.alt_day_string
-        else:
-            keystr = ds.days_of_week_dict_longname[trip.serviceid]
-        if(keystr in day_triplistdict.keys()):
-            day_triplistdict[keystr].append(trip)
-        else:
-            day_triplistdict[keystr] = [trip]
-    for key in day_triplistdict:
-        day_order.append(key)
-    day_order.sort(key = lambda x: ds.service_order_dict.setdefault(day_triplistdict[x][0].serviceid, 10000)) #sort by first trip's service id, any unfound keys last
-    return template('route', day_triplistdict=day_triplistdict, day_order=day_order, routenum=routenum, routename=rdict[this_route][1])
+@app.route('/routes/<number:int>')
+def route_number(number):
+    if is_route_number(number):
+        return template('route', route=get_route_by_number(number))
+    return template('error', error=f'Route {number} Not Found')
 
 @app.route('/history')
 @app.route('/history/')
@@ -98,88 +79,49 @@ def realtime():
         valid = rt.load_realtime()
         if((not valid) and start.RELOAD_ENABLED):
             start.download_and_restart()
+
+        update_bus_realtime()
+
         hist.update_last_seen()
+        update_history()
     group = request.query.get('group', 'all')
 
-    rtbuslist = []
-    for busid in rt.rtvehicle_dict:
-        bus = rt.rtvehicle_dict[busid]
-        try:
-            # if we know the real time translation, add it here
-            fleet_num = rt.id2fleetnum_dict[busid]
-            bus.fleetnum = fleet_num
-            bus.unknown_fleetnum_flag = False
-        except KeyError:
-            bus.fleetnum = PLACEHOLDER
-        rtbuslist.append(bus)
-        # now - sort that list however we please
-    rtbuslist.sort(key=lambda x: (int(x.scheduled) * -1, int(x.fleetnum)))
-    return template('realtime', time_string=rt.get_data_refreshed_time_str(), rtbuslist=rtbuslist, tripdict=ds.tripdict, stopdict=ds.stopdict, group=group, rdict=rdict)
+    buses = [bus for bus in get_all_buses() if bus.status != BusStatus.NOT_TRACKING]
+    return template('realtime', buses=buses, group=group)
 
 @app.route('/bus')
 @app.route('/bus/')
 def bus():
     return template('error', error='No Bus Specified')
 
-@app.route('/bus/<fleetnum:int>')
-def bus_number(fleetnum):
-    if(not businfo.is_known_bus(str(fleetnum))):
-        return template('error', error='Unknown Bus {0}'.format(fleetnum), message='Is this a new bus?')
-    return template('bus', fleetnum=str(fleetnum))
+@app.route('/bus/<number:int>')
+def bus(number):
+    if is_bus_number(number):
+        return template('bus', bus=get_bus_by_number(number))
+    return template('error', error=f'Bus {number} Not Found', message='Is this a new bus?')
 
 @app.route('/blocks')
 @app.route('/blocks/')
 def blocks():
-    return template('blocks')
+    return template('blocks', blocks=get_all_blocks())
 
-@app.route('/blocks/<blockid:int>')
-def block_id(blockid):
-    try:
-        triplist = ds.blockdict[str(blockid)].triplist
-    except KeyError:
-        return template('error', error='Block {0} Not Found'.format(blockid))
-    return template('block', blockid=blockid, triplist=triplist)
-
-@app.route('/trips/<tripid:int>')
-def trip_id(tripid):
-    try:
-        trip = ds.tripdict[str(tripid)]
-    except KeyError:
-        return template('error', error='Trip {0} Not Found'.format(tripid))
-    return template('trip', tripid=tripid, trip=trip)
-
-@app.route('/stops/<stopcode:int>')
-def stop_number(stopcode):
-    try:
-        # grab the stop object from the stopcode
-        stop = ds.stopdict[ds.stopcode2stopnum[str(stopcode)]]
-    except KeyError:
-        return template('error', error='Stop {0} Not Found'.format(stopcode))
-
-    service_day = request.query.service
-
-    entries = stop.entries
-    day_entries = {}
-    for entry_tuple in entries:
-        entry = ds.StopEntry(entry_tuple[0], entry_tuple[1])
-        trip = entry.trip
-        if(ds.days_of_week_dict[trip.serviceid]) == 'INVALID':
-            continue
-
-        if(trip.use_alt_day_string):
-            keystr = trip.alt_day_string
-        else:
-            keystr = ds.days_of_week_dict_longname[trip.serviceid]
-
-        if(keystr in day_entries.keys()):
-            day_entries[keystr].append(entry)
-        else:
-            day_entries[keystr] = [entry]
-    day_order = []
-    for day_str in day_entries:
-        day_order.append(day_str)
-    day_order.sort(key = lambda x: ds.service_order_dict.setdefault(day_entries[x][0].trip.serviceid, 10000))
-    return template('stop', stop=stop, day_order=day_order, day_entries=day_entries)
+@app.route('/blocks/<block_id:int>')
+def blocks(block_id):
+    if is_block(block_id):
+        return template('block', block=get_block(block_id))
+    return template('error', error=f'Block {block_id} Not Found')
+    
+@app.route('/trips/<trip_id:int>')
+def trips(trip_id):
+    if is_trip(trip_id):
+        return template('trip', trip=get_trip(trip_id))
+    return template('error', error=f'Trip {trip_id} Not Found')
+    
+@app.route('/stops/<number:int>')
+def stops(number):
+    if is_stop_number(number):
+        return template('stop', stop=get_stop_by_number(number))
+    return template('error', error=f'Stop {number} Not Found')
 
 @app.route('/about')
 @app.route('/about/')

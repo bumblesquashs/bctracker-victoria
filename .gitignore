@@ -3,6 +3,7 @@ data/realtime_downloads/*
 !data/realtime_downloads/default_gtfrealtime_VehiclePositions.bin
 data/google_transit.zip
 data/google_transit/
+data/history/
 data/vehicle_history/last_seen.json
 data/vehicle_history/vehicle/*
 data/nextride/archived-route-json/

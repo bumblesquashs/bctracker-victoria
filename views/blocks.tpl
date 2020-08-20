@@ -1,6 +1,3 @@
-% import datastructure as ds
-% from formatting import format_time
-
 % include('templates/header', title='All Blocks')
 
 <h1>All Blocks</h1>
@@ -20,21 +17,18 @@
     </tr>
   </thead>
   <tbody>
-    % blocklist = list(ds.blockdict.values())
-    % blocklist.sort(key = lambda x: (ds.service_order_dict.setdefault(x.serviceid, 10000), int(x.blockid)))
-    % for block in blocklist:
-      % b_routes = block.get_block_routes()
+    % for block in sorted(blocks):
       <tr>
         <td>
-          <a href="blocks/{{block.blockid}}">{{ block.blockid }}</a>
+          <a href="blocks/{{block.block_id}}">{{ block.block_id }}</a>
           <span class="mobile-only smaller-font">
             <br />
-            {{ ', '.join(sorted(b_routes)) }}
+            {{ block.routes_string }}
           </span>
         </td>
-        <td class="desktop-only">{{ ', '.join(sorted(b_routes)) }}</td>
-        <td>{{ format_time(block.triplist[0].starttime) }}</td>
-        <td class="no-wrap">{{ ds.days_of_week_dict[block.serviceid] }}</td>
+        <td class="desktop-only">{{ block.routes_string }}</td>
+        <td>{{ block.start_time }}</td>
+        <td class="no-wrap">{{ block.service }}</td>
       </tr>
     % end
   </tbody>
