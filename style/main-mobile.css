@@ -74,6 +74,8 @@ table {
 }
 
 #mobile-navbar {
+    position: relative;
+    z-index: 10;
     margin: 0px;
     padding: 10px 20px 20px 20px;
     overflow: hidden;

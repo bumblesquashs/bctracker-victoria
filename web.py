@@ -116,6 +116,23 @@ def realtime():
     rtbuslist.sort(key=lambda x: int(x.fleetnum))
     return template('realtime', time_string=rt.get_data_refreshed_time_str(), rtbuslist=rtbuslist, tripdict=ds.tripdict, stopdict=ds.stopdict, group=group, rdict=rdict)
 
+@app.route('/map')
+@app.route('/map/')
+def map():
+    rtbuslist = []
+    for busid in rt.rtvehicle_dict:
+        bus = rt.rtvehicle_dict[busid]
+        try:
+            # if we know the real time translation, add it here
+            fleet_num = rt.id2fleetnum_dict[busid]
+            bus.fleetnum = fleet_num
+            bus.unknown_fleetnum_flag = False
+        except KeyError:
+            bus.fleetnum = PLACEHOLDER
+        rtbuslist.append(bus)
+    rtbuslist.sort(key=lambda x: int(x.fleetnum))
+    return template('map', rtbuslist=rtbuslist)
+
 @app.route('/bus')
 @app.route('/bus/')
 def bus():
