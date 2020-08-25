@@ -90,7 +90,7 @@
       models = set(map(lambda b: b.range.model, buses))
       for model in sorted(models):
         model_buses = [bus for bus in buses if bus.range.model == model]
-        include('templates/realtime_list', group_name=model, buses=model_buses)
+        include('templates/realtime_list', group_name=model, buses=model_buses, show_model=False)
       end
     end
   %>

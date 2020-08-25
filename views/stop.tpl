@@ -4,7 +4,13 @@
 <h2>Bus Stop {{ stop.number }}</h2>
 <hr />
 
-% include('templates/map', lon=stop.lon, lat=stop.lat)
+% include('templates/map', lon=stop.lon, lat=stop.lat, marker_type='stop')
+
+<p>
+  % for day_str in day_order:
+    <a href="#{{day_str}}" class="button spaced-button">{{ day_str }}</a>
+  % end
+</p>
 
 % for service in sorted(stop.services):
   % stop_times = [stop_time for stop_time in stop.stop_times if stop_time.trip.service == service]

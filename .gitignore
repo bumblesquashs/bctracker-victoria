@@ -9,6 +9,7 @@ data/vehicle_history/vehicle/*
 data/nextride/archived-route-json/
 data/nextride/id2fleetnum.json
 data/nextride/last_api_result.json
+server.conf
 
 __pycache__/
 .vscode

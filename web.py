@@ -22,11 +22,13 @@ from trip import is_trip, get_trip
 PLACEHOLDER = '100000'
 rdict = {}     # rdict is routeid -> (routenum, routename, routeid)
 reverse_rdict = {} # route num -> routeid
+mapbox_api_key = ''
 
 # Web framework code to start the server
 def startup():
     global rdict
     global reverse_rdict
+    global mapbox_api_key
     print('WEB: initializing the web server!')
     rdict = ds.routedict
     # build a reverse route table for handling web requests (routenum->routeid)
@@ -35,12 +37,9 @@ def startup():
     # Calls to run the bottle code on the cherrypy server
     cp.config.update('server.conf')
     cp.tree.graft(make_access_log(app, 'logs/access_log.log'), '/')
+    mapbox_api_key = cp.config['mapbox_api_key']
     cp.log('Whaaat? here we go')
     cp.server.start() #That's it for our startup code
-
-# ==============================================================
-# Web helper code!
-# ==============================================================
 
 # =============================================================
 # Web framework: assign routes - its all Server side rendering
@@ -51,9 +50,13 @@ app = Bottle()
 def style(filename):
     return static_file(filename, root='./style')
 
+@app.route('/img/<filename:path>')
+def style(filename):
+    return static_file(filename, root='./img')
+
 @app.route('/')
 def index():
-    return template('home', routes=get_all_routes())
+    return template('home')
 
 @app.route('/routes')
 @app.route('/routes/')
@@ -109,13 +112,13 @@ def blocks():
 def blocks(block_id):
     if is_block(block_id):
         return template('block', block=get_block(block_id))
-    return template('error', error=f'Block {block_id} Not Found')
+    return template('error', error=f'Block {block_id} Not Found', message='This block may be from an older version of GTFS which is no longer valid')
     
 @app.route('/trips/<trip_id:int>')
 def trips(trip_id):
     if is_trip(trip_id):
         return template('trip', trip=get_trip(trip_id))
-    return template('error', error=f'Trip {trip_id} Not Found')
+    return template('error', error=f'Trip {trip_id} Not Found', message='This trip may be from an older version of GTFS which is no longer valid')
     
 @app.route('/stops/<number:int>')
 def stops(number):

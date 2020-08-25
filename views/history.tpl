@@ -9,7 +9,7 @@
 <hr />
 
 <h2>Last Block Assigned</h2>
-<p>For entries made under a older GTFS version, the block will no longer be valid</p>
+<p>For entries made under a older GTFS version, the block may no longer be valid</p>
 <table class="pure-table pure-table-horizontal pure-table-striped">
   <thead>
     <tr>

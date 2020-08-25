@@ -13,14 +13,14 @@
   <h2>{{ bus }} is not active right now</h2>
   <p>Last updated {{ get_update_time() }}</p>
 % elif bus.status == BusStatus.NOT_IN_SERVICE:
-  % include('templates/map', lat=bus.lat, lon=bus.lon)
+  % include('templates/map', lat=bus.lat, lon=bus.lon, marker_type='bus')
 
   <h2>{{ bus }} is active, but not assigned to any route</h2>
   <p>Last updated {{ get_update_time() }}</p>
 % elif bus.status == BusStatus.IN_SERVICE:
   % trip = bus.realtime.trip
 
-  % include('templates/map', lat=bus.lat, lon=bus.lon)
+  % include('templates/map', lat=bus.lat, lon=bus.lon, marker_type='bus')
 
   <h2>{{ trip.headsign }}</h2>
   <p>Last updated {{ get_update_time() }}</p>
@@ -49,7 +49,7 @@
 % end
 
 % if len(block_history) > 0:
-  <p>For entries made under a older GTFS version, the block will no longer be valid</p>
+  <p>For entries made under a older GTFS version, the block may no longer be valid</p>
   <table class="pure-table pure-table-horizontal pure-table-striped">
     <thead>
       <tr>

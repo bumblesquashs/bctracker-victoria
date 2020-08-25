@@ -6,8 +6,13 @@
   <thead>
     <tr>
       <th class="desktop-only">Fleet Number</th>
-      <th class="desktop-only">Year and Model</th>
-      <th class="mobile-only">Bus</th>
+      % if get('show_model', True):
+        <th class="desktop-only">Year and Model</th>
+        <th class="mobile-only">Bus</th>
+      % else:
+        <th class="desktop-only">Year</th>
+        <th class="mobile-only" style="width: 20%;">Bus</th>
+      % end
       <th>Headsign</th>
       <th class="desktop-only">Current Block</th>
       <th class="desktop-only">Current Trip</th>
@@ -25,10 +30,18 @@
             <a href="/bus/{{bus.number}}">{{ bus }}</a>
             <span class="mobile-only smaller-font">
               <br />
-              {{ bus.range }}
+              {{ bus.range.year }}
+              % if get('show_model', True):
+                {{ bus.range.model }}
+              % end
             </span>
           </td>
-          <td class="desktop-only">{{ bus.range }}</td>
+          <td class="desktop-only">
+            {{ bus.range.year }}
+            % if get('show_model', True):
+              {{ bus.range.model }}
+            % end
+          </td>
         % end
 
         % if bus.status == BusStatus.IN_SERVICE:
@@ -38,15 +51,15 @@
           % if bus.realtime.at_stop:
             <td class="desktop-only"><a href="/stops/{{bus.realtime.stop.number}}">{{ bus.realtime.stop.name }}</a></td>
           % else:
-            <td class="desktop-only">Unavailable</td>
+            <td class="desktop-only lighter-text">Unavailable</td>
           % end
         % elif bus.status == BusStatus.NOT_IN_SERVICE:
-          <td>Not in service</td>
+          <td class="lighter-text">Not in service</td>
           <td class="desktop-only"></td>
           <td class="desktop-only"></td>
           <td class="desktop-only"></td>
-        %end
+        % end
       </tr>
-    %end
+    % end
   </tbody>
 </table>

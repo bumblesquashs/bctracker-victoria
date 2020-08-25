@@ -5,10 +5,16 @@
 <h1>{{ route }}</h1>
 <hr />
 
+<p>
+  % for day_str in day_order:
+    <a href="#{{day_str}}" class='button spaced-button'>{{ day_str }}</a>
+  % end
+</p>
+
 % for service in sorted(route.services):
   % trips = [trip for trip in route.trips if trip.service == service]
 
-  <h2>{{ service }}</h2>
+  <h2 id="{{service}}">{{ service }}</h2>
 
   % outbound_trips = [trip for trip in trips if trip.direction == Direction.OUTBOUND]
   % if len(outbound_trips) > 0:

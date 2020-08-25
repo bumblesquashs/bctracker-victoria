@@ -73,6 +73,10 @@ table {
     table-layout: fixed;
 }
 
+.button.spaced-button {
+    margin-bottom: 10px;
+}
+
 #mobile-navbar {
     margin: 0px;
     padding: 10px 20px 20px 20px;
